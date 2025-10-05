@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hard Money Loan Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .load-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .load-btn {
+            background: #43e97b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .load-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .section {
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header:hover {
+            opacity: 0.9;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s;
+        }
+
+        .section.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .section.collapsed .section-content {
+            display: none;
+        }
+
+        .input-group {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-with-prefix {
+            position: relative;
+        }
+
+        .input-prefix {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .input-with-prefix input {
+            padding-left: 30px;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-card {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .result-card .value {
+            color: #333;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .profit {
+            color: #10b981;
+        }
+
+        .loss {
+            color: #ef4444;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .chart-container h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .breakdown {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .breakdown h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            color: #667eea;
+            padding-top: 15px;
+            margin-top: 5px;
+            border-top: 2px solid #667eea;
+        }
+
+        .breakdown-label {
+            color: #666;
+        }
+
+        .breakdown-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .deal-alert {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .deal-alert.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .deal-alert h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .deal-alert p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .underwriting-btn {
+            background: white;
+            color: #10b981;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .underwriting-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .underwriting-report {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .underwriting-report.show {
+            display: block;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+
+        .report-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .report-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .report-content {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 30px;
+        }
+
+        .report-section {
+            margin-bottom: 30px;
+        }
+
+        .report-section h3 {
+            color: #667eea;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .report-item-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .report-item-value {
+            color: #333;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .report-table th {
+            background: #f8f9ff;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .report-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .report-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .report-table .total-row {
+            background: #f8f9ff;
+            font-weight: 700;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .print-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .email-btn {
+            background: #43e97b;
+            color: white;
+        }
+
+        .save-btn {
+            background: #f093fb;
+            color: white;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .calculator {
+                box-shadow: none;
+                padding: 20px;
+            }
+            .section, .calculate-btn, .deal-alert, .action-buttons, .load-section {
+                display: none !important;
+            }
+            .underwriting-report {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Hard Money Loan Calculator</h1>
+        <p class="subtitle">Comprehensive Real Estate Investment Analysis</p>
+
+        <div class="load-section">
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+            <button class="load-btn" onclick="document.getElementById('fileInput').click()">📂 Load Saved Project</button>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Property Details</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="input-group" style="grid-column: 1 / -1;">
+                    <label for="projectTitle">Property Address / Project Title</label>
+                    <input type="text" id="projectTitle" placeholder="123 Main Street, City, State" value="">
+                </div>
+                <div class="input-group">
+                    <label for="purchasePrice">Purchase Price</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="purchasePrice" value="200000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="renovationCosts">Renovation Costs</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="renovationCosts" value="50000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="arv">After Repair Value (ARV)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="arv" value="350000">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Loan Terms</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="input-group">
+                    <label for="interestRate">Interest Rate (Annual %)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">%</span>
+                        <input type="number" id="interestRate" value="12" step="0.1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="loanTerm">Length of Loan (Months)</label>
+                    <input type="number" id="loanTerm" value="12">
+                </div>
+                <div class="input-group">
+                    <label for="maxLTV">Max LTV of ARV (%)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">%</span>
+                        <input type="number" id="maxLTV" value="70" step="0.1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Buying Costs</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="input-group">
+                    <label for="titleCompany">Title Company Fee</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="titleCompany" value="2000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="buyTransferTax">Transfer Tax</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="buyTransferTax" value="2000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="lenderPoints">Lender Points (%)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">%</span>
+                        <input type="number" id="lenderPoints" value="3" step="0.1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="otherBuying">Other Buying Costs</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="otherBuying" value="1000">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Carrying Costs</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="input-group">
+                    <label for="propertyTax">Annual Property Tax</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="propertyTax" value="3000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="insurance">Annual Insurance</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="insurance" value="1200">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="utilities">Utilities (Monthly)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="utilities" value="200">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="otherCarrying">Other Monthly Costs</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="otherCarrying" value="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Selling Costs</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="input-group">
+                    <label for="agentCommission">Agent Commission (%)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">%</span>
+                        <input type="number" id="agentCommission" value="6" step="0.1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="sellTransferTax">Transfer Tax</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="sellTransferTax" value="3500">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="buyerContributions">Buyer Contributions</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="buyerContributions" value="5000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="otherSelling">Other Selling Costs</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input type="number" id="otherSelling" value="1000">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculate()">Calculate Investment Analysis</button>
+
+        <div class="deal-alert" id="dealAlert">
+            <h3>✓ This Deal Shows Strong Potential!</h3>
+            <p>Based on your numbers, this investment appears profitable. Generate a detailed underwriting report to present to investors and lenders.</p>
+            <button class="underwriting-btn" onclick="generateReport()">Generate Detailed Underwriting Report</button>
+        </div>
+
+        <div class="results" id="results">
+            <div class="project-header" id="projectHeader" style="display: none;">
+                <h2 style="color: #667eea; margin-bottom: 20px; font-size: 22px; text-align: center;"></h2>
+            </div>
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3>Loan Amount</h3>
+                    <div class="value" id="loanAmount">$0</div>
+                </div>
+                <div class="result-card">
+                    <h3>Out of Pocket</h3>
+                    <div class="value" id="outOfPocket">$0</div>
+                </div>
+                <div class="result-card">
+                    <h3>Total Investment</h3>
+                    <div class="value" id="totalInvestment">$0</div>
+                </div>
+                <div class="result-card">
+                    <h3>Net Profit</h3>
+                    <div class="value" id="netProfit">$0</div>
+                </div>
+                <div class="result-card">
+                    <h3>ROI</h3>
+                    <div class="value" id="roi">0%</div>
+                </div>
+                <div class="result-card">
+                    <h3>Annualized ROI</h3>
+                    <div class="value" id="annualizedRoi">0%</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Cost Breakdown</h3>
+                    <canvas id="costChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Investment vs Return</h3>
+                    <canvas id="profitChart"></canvas>
+                </div>
+            </div>
+
+            <div class="breakdown">
+                <h3>Detailed Cost Breakdown</h3>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Purchase Price</span>
+                    <span class="breakdown-value" id="bd-purchase">$0</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Renovation Costs</span>
+                    <span class="breakdown-value" id="bd-renovation">$0</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Buying Costs</span>
+                    <span class="breakdown-value" id="bd-buying">$0</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Carrying Costs</span>
+                    <span class="breakdown-value" id="bd-carrying">$0</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Selling Costs</span>
+                    <span class="breakdown-value" id="bd-selling">$0</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Total Costs</span>
+                    <span class="breakdown-value" id="bd-total">$0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="underwriting-report" id="underwritingReport">
+            <div class="report-header">
+                <h2>Investment Underwriting Report</h2>
+                <p id="reportProjectTitle"></p>
+                <p id="reportDate"></p>
+            </div>
+            <div class="report-content">
+                <div class="report-section">
+                    <h3>Executive Summary</h3>
+                    <div class="report-grid">
+                        <div class="report-item">
+                            <div class="report-item-label">Purchase Price</div>
+                            <div class="report-item-value" id="report-purchase">$0</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">After Repair Value</div>
+                            <div class="report-item-value" id="report-arv">$0</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Total Investment</div>
+                            <div class="report-item-value" id="report-total-investment">$0</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Net Profit</div>
+                            <div class="report-item-value" id="report-net-profit">$0</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">ROI</div>
+                            <div class="report-item-value" id="report-roi">0%</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Annualized ROI</div>
+                            <div class="report-item-value" id="report-annual-roi">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>Financing Structure</h3>
+                    <div class="report-grid">
+                        <div class="report-item">
+                            <div class="report-item-label">Loan Amount</div>
+                            <div class="report-item-value" id="report-loan-amount">$0</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Interest Rate</div>
+                            <div class="report-item-value" id="report-interest-rate">0%</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Loan Term</div>
+                            <div class="report-item-value" id="report-loan-term">0 months</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Monthly Interest Payment</div>
+                            <div class="report-item-value" id="report-monthly-payment">$0</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Total Interest Paid</div>
+                            <div class="report-item-value" id="report-total-interest">$0</div>
+                        </div>
+                        <div class="report-item">
+                            <div class="report-item-label">Out of Pocket</div>
+                            <div class="report-item-value" id="report-out-of-pocket">$0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>Buying Costs Breakdown</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="buyingCostsTable"></tbody>
+                    </table>
+                </div>
+
+                <div class="report-section">
+                    <h3>Carrying Costs Breakdown</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Monthly</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carryingCostsTable"></tbody>
+                    </table>
+                </div>
+
+                <div class="report-section">
+                    <h3>Selling Costs Breakdown</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sellingCostsTable"></tbody>
+                    </table>
+                </div>
+
+                <div class="report-section">
+                    <h3>Investment Summary</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Purchase Price</td>
+                                <td id="summary-purchase">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Renovation Costs</td>
+                                <td id="summary-renovation">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Buying Costs</td>
+                                <td id="summary-buying">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Carrying Costs</td>
+                                <td id="summary-carrying">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Selling Costs</td>
+                                <td id="summary-selling">$0</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Total Project Cost</td>
+                                <td id="summary-total">$0</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>After Repair Value</td>
+                                <td id="summary-arv">$0</td>
+                            </tr>
+                            <tr class="total-row" style="color: #10b981;">
+                                <td>Net Profit</td>
+                                <td id="summary-profit">$0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn print-btn" onclick="printReport()">🖨️ Print Report</button>
+                    <button class="action-btn email-btn" onclick="emailReport()">📧 Email Report</button>
+                    <button class="action-btn save-btn" onclick="saveReport()">💾 Save Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let costChart = null;
+        let profitChart = null;
+        let calculationData = {};
+
+        function toggleSection(header) {
+            header.parentElement.classList.toggle('collapsed');
+        }
+
+        function formatCurrency(value) {
+            return '$' + Math.abs(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        loadProjectData(data);
+                        alert('Project loaded successfully!');
+                    } catch (error) {
+                        alert('Error loading file. Please make sure it is a valid project file.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function loadProjectData(data) {
+            document.getElementById('projectTitle').value = data.projectTitle || '';
+            document.getElementById('purchasePrice').value = data.purchasePrice || 0;
+            document.getElementById('renovationCosts').value = data.renovationCosts || 0;
+            document.getElementById('arv').value = data.arv || 0;
+            document.getElementById('interestRate').value = data.interestRate || 0;
+            document.getElementById('loanTerm').value = data.loanTerm || 0;
+            document.getElementById('maxLTV').value = data.maxLTV || 0;
+            document.getElementById('titleCompany').value = data.titleCompany || 0;
+            document.getElementById('buyTransferTax').value = data.buyTransferTax || 0;
+            document.getElementById('lenderPoints').value = data.lenderPoints || 0;
+            document.getElementById('otherBuying').value = data.otherBuying || 0;
+            document.getElementById('propertyTax').value = data.propertyTax || 0;
+            document.getElementById('insurance').value = data.insurance || 0;
+            document.getElementById('utilities').value = data.utilities || 0;
+            document.getElementById('otherCarrying').value = data.otherCarrying || 0;
+            document.getElementById('agentCommission').value = data.agentCommission || 0;
+            document.getElementById('sellTransferTax').value = data.sellTransferTax || 0;
+            document.getElementById('buyerContributions').value = data.buyerContributions || 0;
+            document.getElementById('otherSelling').value = data.otherSelling || 0;
+            
+            calculate();
+        }
+
+        function calculate() {
+            const projectTitle = document.getElementById('projectTitle').value;
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
+            const renovationCosts = parseFloat(document.getElementById('renovationCosts').value) || 0;
+            const arv = parseFloat(document.getElementById('arv').value) || 0;
+
+            const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+            const loanTerm = parseInt(document.getElementById('loanTerm').value) || 0;
+            const maxLTV = parseFloat(document.getElementById('maxLTV').value) || 0;
+
+            const maxLoanAmount = arv * (maxLTV / 100);
+            const neededAmount = purchasePrice + renovationCosts;
+            const loanAmount = Math.min(maxLoanAmount, neededAmount);
+
+            const titleCompany = parseFloat(document.getElementById('titleCompany').value) || 0;
+            const buyTransferTax = parseFloat(document.getElementById('buyTransferTax').value) || 0;
+            const lenderPoints = parseFloat(document.getElementById('lenderPoints').value) || 0;
+            const pointsFee = loanAmount * (lenderPoints / 100);
+            const otherBuying = parseFloat(document.getElementById('otherBuying').value) || 0;
+            const totalBuyingCosts = titleCompany + buyTransferTax + pointsFee + otherBuying;
+
+            const propertyTax = parseFloat(document.getElementById('propertyTax').value) || 0;
+            const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+            const utilities = parseFloat(document.getElementById('utilities').value) || 0;
+            const otherCarrying = parseFloat(document.getElementById('otherCarrying').value) || 0;
+
+            const monthlyInterestRate = interestRate / 100 / 12;
+            const totalInterest = loanAmount * monthlyInterestRate * loanTerm;
+
+            const monthlyCarrying = (propertyTax / 12) + (insurance / 12) + utilities + otherCarrying;
+            const totalCarryingCosts = totalInterest + (monthlyCarrying * loanTerm);
+
+            const agentCommission = parseFloat(document.getElementById('agentCommission').value) || 0;
+            const commissionAmount = arv * (agentCommission / 100);
+            const sellTransferTax = parseFloat(document.getElementById('sellTransferTax').value) || 0;
+            const buyerContributions = parseFloat(document.getElementById('buyerContributions').value) || 0;
+            const otherSelling = parseFloat(document.getElementById('otherSelling').value) || 0;
+            const totalSellingCosts = commissionAmount + sellTransferTax + buyerContributions + otherSelling;
+
+            const totalCosts = purchasePrice + renovationCosts + totalBuyingCosts + totalCarryingCosts + totalSellingCosts;
+            const outOfPocket = neededAmount - loanAmount + totalBuyingCosts + (monthlyCarrying * loanTerm);
+            const netProfit = arv - totalCosts - loanAmount;
+            const roi = outOfPocket > 0 ? (netProfit / outOfPocket) * 100 : 0;
+            const annualizedRoi = loanTerm > 0 ? (roi / loanTerm) * 12 : 0;
+
+            document.getElementById('loanAmount').textContent = formatCurrency(loanAmount);
+            document.getElementById('outOfPocket').textContent = formatCurrency(outOfPocket);
+            document.getElementById('totalInvestment').textContent = formatCurrency(totalCosts + loanAmount);
+            
+            const profitElement = document.getElementById('netProfit');
+            profitElement.textContent = (netProfit >= 0 ? '' : '-') + formatCurrency(netProfit);
+            profitElement.className = 'value ' + (netProfit >= 0 ? 'profit' : 'loss');
+
+            const roiElement = document.getElementById('roi');
+            roiElement.textContent = roi.toFixed(2) + '%';
+            roiElement.className = 'value ' + (roi >= 0 ? 'profit' : 'loss');
+
+            const annRoiElement = document.getElementById('annualizedRoi');
+            annRoiElement.textContent = annualizedRoi.toFixed(2) + '%';
+            annRoiElement.className = 'value ' + (annualizedRoi >= 0 ? 'profit' : 'loss');
+
+            document.getElementById('bd-purchase').textContent = formatCurrency(purchasePrice);
+            document.getElementById('bd-renovation').textContent = formatCurrency(renovationCosts);
+            document.getElementById('bd-buying').textContent = formatCurrency(totalBuyingCosts);
+            document.getElementById('bd-carrying').textContent = formatCurrency(totalCarryingCosts);
+            document.getElementById('bd-selling').textContent = formatCurrency(totalSellingCosts);
+            document.getElementById('bd-total').textContent = formatCurrency(totalCosts);
+
+            const projectHeader = document.getElementById('projectHeader');
+            if (projectTitle.trim()) {
+                projectHeader.style.display = 'block';
+                projectHeader.querySelector('h2').textContent = projectTitle;
+            } else {
+                projectHeader.style.display = 'none';
+            }
+
+            if (costChart) costChart.destroy();
+            if (profitChart) profitChart.destroy();
+
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            costChart = new Chart(costCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Purchase Price', 'Renovation', 'Buying Costs', 'Carrying Costs', 'Selling Costs'],
+                    datasets: [{
+                        data: [purchasePrice, renovationCosts, totalBuyingCosts, totalCarryingCosts, totalSellingCosts],
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = formatCurrency(context.parsed);
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const profitCtx = document.getElementById('profitChart').getContext('2d');
+            profitChart = new Chart(profitCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Investment', 'After Repair Value', 'Net Profit'],
+                    datasets: [{
+                        data: [totalCosts + loanAmount, arv, netProfit],
+                        backgroundColor: ['#f093fb', '#43e97b', netProfit >= 0 ? '#10b981' : '#ef4444'],
+                        borderColor: ['#d06ae8', '#38d278', netProfit >= 0 ? '#059669' : '#dc2626'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000).toFixed(0) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('results').classList.add('show');
+
+            calculationData = {
+                projectTitle, purchasePrice, renovationCosts, arv, interestRate, loanTerm, maxLTV,
+                loanAmount, titleCompany, buyTransferTax, lenderPoints, pointsFee, otherBuying,
+                totalBuyingCosts, propertyTax, insurance, utilities, otherCarrying, monthlyCarrying,
+                totalInterest, totalCarryingCosts, monthlyInterestRate, agentCommission,
+                commissionAmount, sellTransferTax, buyerContributions, otherSelling,
+                totalSellingCosts, totalCosts, outOfPocket, netProfit, roi, annualizedRoi
+            };
+
+            const dealAlert = document.getElementById('dealAlert');
+            if (netProfit > 0 && roi > 15) {
+                dealAlert.classList.add('show');
+            } else {
+                dealAlert.classList.remove('show');
+            }
+
+            document.getElementById('underwritingReport').classList.remove('show');
+        }
+
+        function generateReport() {
+            const data = calculationData;
+            const report = document.getElementById('underwritingReport');
+
+            document.getElementById('reportProjectTitle').textContent = data.projectTitle || 'Investment Property Analysis';
+            document.getElementById('reportDate').textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', month: 'long', day: 'numeric' 
+            });
+
+            document.getElementById('report-purchase').textContent = formatCurrency(data.purchasePrice);
+            document.getElementById('report-arv').textContent = formatCurrency(data.arv);
+            document.getElementById('report-total-investment').textContent = formatCurrency(data.totalCosts + data.loanAmount);
+            document.getElementById('report-net-profit').textContent = formatCurrency(data.netProfit);
+            document.getElementById('report-roi').textContent = data.roi.toFixed(2) + '%';
+            document.getElementById('report-annual-roi').textContent = data.annualizedRoi.toFixed(2) + '%';
+
+            document.getElementById('report-loan-amount').textContent = formatCurrency(data.loanAmount);
+            document.getElementById('report-interest-rate').textContent = data.interestRate + '%';
+            document.getElementById('report-loan-term').textContent = data.loanTerm + ' months';
+            
+            const monthlyInterestPayment = data.loanAmount * data.monthlyInterestRate;
+            document.getElementById('report-monthly-payment').textContent = formatCurrency(monthlyInterestPayment);
+            document.getElementById('report-total-interest').textContent = formatCurrency(data.totalInterest);
+            document.getElementById('report-out-of-pocket').textContent = formatCurrency(data.outOfPocket);
+
+            const buyingTable = document.getElementById('buyingCostsTable');
+            buyingTable.innerHTML = 
+                '<tr><td>Title Company Fee</td><td>' + formatCurrency(data.titleCompany) + '</td></tr>' +
+                '<tr><td>Transfer Tax</td><td>' + formatCurrency(data.buyTransferTax) + '</td></tr>' +
+                '<tr><td>Lender Points (' + data.lenderPoints + '%)</td><td>' + formatCurrency(data.pointsFee) + '</td></tr>' +
+                '<tr><td>Other Costs</td><td>' + formatCurrency(data.otherBuying) + '</td></tr>' +
+                '<tr class="total-row"><td>Total Buying Costs</td><td>' + formatCurrency(data.totalBuyingCosts) + '</td></tr>';
+
+            const monthlyPropertyTax = data.propertyTax / 12;
+            const monthlyInsurance = data.insurance / 12;
+            const totalPropertyTax = monthlyPropertyTax * data.loanTerm;
+            const totalInsurance = monthlyInsurance * data.loanTerm;
+            const totalUtilities = data.utilities * data.loanTerm;
+            const totalOtherCarrying = data.otherCarrying * data.loanTerm;
+
+            const carryingTable = document.getElementById('carryingCostsTable');
+            carryingTable.innerHTML = 
+                '<tr><td>Interest Payments</td><td>' + formatCurrency(monthlyInterestPayment) + '</td><td>' + formatCurrency(data.totalInterest) + '</td></tr>' +
+                '<tr><td>Property Tax</td><td>' + formatCurrency(monthlyPropertyTax) + '</td><td>' + formatCurrency(totalPropertyTax) + '</td></tr>' +
+                '<tr><td>Insurance</td><td>' + formatCurrency(monthlyInsurance) + '</td><td>' + formatCurrency(totalInsurance) + '</td></tr>' +
+                '<tr><td>Utilities</td><td>' + formatCurrency(data.utilities) + '</td><td>' + formatCurrency(totalUtilities) + '</td></tr>' +
+                '<tr><td>Other Costs</td><td>' + formatCurrency(data.otherCarrying) + '</td><td>' + formatCurrency(totalOtherCarrying) + '</td></tr>' +
+                '<tr class="total-row"><td>Total Carrying Costs</td><td>' + formatCurrency(data.monthlyCarrying) + '</td><td>' + formatCurrency(data.totalCarryingCosts) + '</td></tr>';
+
+            const sellingTable = document.getElementById('sellingCostsTable');
+            sellingTable.innerHTML = 
+                '<tr><td>Agent Commission (' + data.agentCommission + '%)</td><td>' + formatCurrency(data.commissionAmount) + '</td></tr>' +
+                '<tr><td>Transfer Tax</td><td>' + formatCurrency(data.sellTransferTax) + '</td></tr>' +
+                '<tr><td>Buyer Contributions</td><td>' + formatCurrency(data.buyerContributions) + '</td></tr>' +
+                '<tr><td>Other Costs</td><td>' + formatCurrency(data.otherSelling) + '</td></tr>' +
+                '<tr class="total-row"><td>Total Selling Costs</td><td>' + formatCurrency(data.totalSellingCosts) + '</td></tr>';
+
+            document.getElementById('summary-purchase').textContent = formatCurrency(data.purchasePrice);
+            document.getElementById('summary-renovation').textContent = formatCurrency(data.renovationCosts);
+            document.getElementById('summary-buying').textContent = formatCurrency(data.totalBuyingCosts);
+            document.getElementById('summary-carrying').textContent = formatCurrency(data.totalCarryingCosts);
+            document.getElementById('summary-selling').textContent = formatCurrency(data.totalSellingCosts);
+            document.getElementById('summary-total').textContent = formatCurrency(data.totalCosts);
+            document.getElementById('summary-arv').textContent = formatCurrency(data.arv);
+            document.getElementById('summary-profit').textContent = formatCurrency(data.netProfit);
+
+            report.classList.add('show');
+            report.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function emailReport() {
+            const data = calculationData;
+            const subject = encodeURIComponent('Investment Analysis Report: ' + (data.projectTitle || 'Property Investment'));
+            const body = encodeURIComponent('Investment Analysis Report\n\nProperty: ' + (data.projectTitle || 'Investment Property') + 
+                '\nGenerated: ' + new Date().toLocaleDateString() + 
+                '\n\nEXECUTIVE SUMMARY\nPurchase Price: ' + formatCurrency(data.purchasePrice) +
+                '\nAfter Repair Value: ' + formatCurrency(data.arv) +
+                '\nNet Profit: ' + formatCurrency(data.netProfit) +
+                '\nROI: ' + data.roi.toFixed(2) + '%' +
+                '\nAnnualized ROI: ' + data.annualizedRoi.toFixed(2) + '%' +
+                '\n\nFINANCING\nLoan Amount: ' + formatCurrency(data.loanAmount) +
+                '\nInterest Rate: ' + data.interestRate + '%' +
+                '\nLoan Term: ' + data.loanTerm + ' months' +
+                '\nMonthly Interest Payment: ' + formatCurrency(data.loanAmount * data.monthlyInterestRate) +
+                '\n\nFor full detailed report, please see attached document.');
+
+            window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+        }
+
+        function saveReport() {
+            const data = {
+                projectTitle: document.getElementById('projectTitle').value,
+                purchasePrice: parseFloat(document.getElementById('purchasePrice').value) || 0,
+                renovationCosts: parseFloat(document.getElementById('renovationCosts').value) || 0,
+                arv: parseFloat(document.getElementById('arv').value) || 0,
+                interestRate: parseFloat(document.getElementById('interestRate').value) || 0,
+                loanTerm: parseInt(document.getElementById('loanTerm').value) || 0,
+                maxLTV: parseFloat(document.getElementById('maxLTV').value) || 0,
+                titleCompany: parseFloat(document.getElementById('titleCompany').value) || 0,
+                buyTransferTax: parseFloat(document.getElementById('buyTransferTax').value) || 0,
+                lenderPoints: parseFloat(document.getElementById('lenderPoints').value) || 0,
+                otherBuying: parseFloat(document.getElementById('otherBuying').value) || 0,
+                propertyTax: parseFloat(document.getElementById('propertyTax').value) || 0,
+                insurance: parseFloat(document.getElementById('insurance').value) || 0,
+                utilities: parseFloat(document.getElementById('utilities').value) || 0,
+                otherCarrying: parseFloat(document.getElementById('otherCarrying').value) || 0,
+                agentCommission: parseFloat(document.getElementById('agentCommission').value) || 0,
+                sellTransferTax: parseFloat(document.getElementById('sellTransferTax').value) || 0,
+                buyerContributions: parseFloat(document.getElementById('buyerContributions').value) || 0,
+                otherSelling: parseFloat(document.getElementById('otherSelling').value) || 0,
+                savedDate: new Date().toISOString()
+            };
+
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const filename = (data.projectTitle ? data.projectTitle.replace(/[^a-z0-9]/gi, '_') : 'Property') + '_' + new Date().toISOString().split('T')[0] + '.json';
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
