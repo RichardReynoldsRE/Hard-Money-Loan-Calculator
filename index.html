@@ -473,7 +473,7 @@
                 padding: 0;
                 max-width: 100%;
             }
-            .section, .calculate-btn, .deal-alert, .action-buttons, .load-section, .results {
+            .section, .calculate-btn, .deal-alert, .action-buttons, .load-section, .results, .charts-grid {
                 display: none !important;
             }
             .underwriting-report {
@@ -485,34 +485,76 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
                 page-break-after: avoid;
+                padding: 20px;
+            }
+            .report-header h2 {
+                font-size: 24px;
+            }
+            .report-header p {
+                font-size: 14px;
             }
             .report-content {
-                padding: 20px;
+                padding: 15px;
             }
             .report-section {
                 page-break-inside: avoid;
-                margin-bottom: 25px;
+                page-break-after: auto;
+                margin-bottom: 20px;
+            }
+            .report-section:first-of-type {
+                page-break-before: avoid;
+            }
+            .report-section h3 {
+                page-break-after: avoid;
+                font-size: 16px;
+                margin-bottom: 10px;
             }
             .report-grid {
-                display: block;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                page-break-inside: avoid;
             }
             .report-item {
-                display: inline-block;
-                width: 48%;
-                margin: 1%;
                 page-break-inside: avoid;
+                padding: 10px;
+                margin: 0;
+            }
+            .report-item-label {
+                font-size: 11px;
+            }
+            .report-item-value {
+                font-size: 14px;
             }
             .report-table {
                 page-break-inside: avoid;
-                font-size: 12px;
+                font-size: 11px;
+                margin: 10px 0;
             }
             .report-table th {
                 background: #f0f0f0 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                padding: 8px;
+                font-size: 11px;
+            }
+            .report-table td {
+                padding: 6px 8px;
+                font-size: 11px;
+            }
+            .report-table .total-row {
+                background: #f8f9ff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
             h2, h3 {
                 page-break-after: avoid;
+            }
+            table {
+                page-break-inside: avoid;
+            }
+            tr {
+                page-break-inside: avoid;
             }
         }
     </style>
