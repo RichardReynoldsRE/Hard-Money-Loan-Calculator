@@ -466,16 +466,53 @@
         @media print {
             body {
                 background: white;
+                padding: 0;
             }
             .calculator {
                 box-shadow: none;
-                padding: 20px;
+                padding: 0;
+                max-width: 100%;
             }
-            .section, .calculate-btn, .deal-alert, .action-buttons, .load-section {
+            .section, .calculate-btn, .deal-alert, .action-buttons, .load-section, .results {
                 display: none !important;
             }
             .underwriting-report {
                 display: block !important;
+                margin: 0;
+            }
+            .report-header {
+                background: #667eea !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                page-break-after: avoid;
+            }
+            .report-content {
+                padding: 20px;
+            }
+            .report-section {
+                page-break-inside: avoid;
+                margin-bottom: 25px;
+            }
+            .report-grid {
+                display: block;
+            }
+            .report-item {
+                display: inline-block;
+                width: 48%;
+                margin: 1%;
+                page-break-inside: avoid;
+            }
+            .report-table {
+                page-break-inside: avoid;
+                font-size: 12px;
+            }
+            .report-table th {
+                background: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            h2, h3 {
+                page-break-after: avoid;
             }
         }
     </style>
@@ -1209,19 +1246,108 @@
 
         function emailReport() {
             const data = calculationData;
+            const monthlyInterestPayment = data.loanAmount * data.monthlyInterestRate;
+            const monthlyPropertyTax = data.propertyTax / 12;
+            const monthlyInsurance = data.insurance / 12;
+            const totalPropertyTax = monthlyPropertyTax * data.loanTerm;
+            const totalInsurance = monthlyInsurance * data.loanTerm;
+            const totalUtilities = data.utilities * data.loanTerm;
+            const totalOtherCarrying = data.otherCarrying * data.loanTerm;
+            
             const subject = encodeURIComponent('Investment Analysis Report: ' + (data.projectTitle || 'Property Investment'));
-            const body = encodeURIComponent('Investment Analysis Report\n\nProperty: ' + (data.projectTitle || 'Investment Property') + 
-                '\nGenerated: ' + new Date().toLocaleDateString() + 
-                '\n\nEXECUTIVE SUMMARY\nPurchase Price: ' + formatCurrency(data.purchasePrice) +
-                '\nAfter Repair Value: ' + formatCurrency(data.arv) +
-                '\nNet Profit: ' + formatCurrency(data.netProfit) +
-                '\nROI: ' + data.roi.toFixed(2) + '%' +
-                '\nAnnualized ROI: ' + data.annualizedRoi.toFixed(2) + '%' +
-                '\n\nFINANCING\nLoan Amount: ' + formatCurrency(data.loanAmount) +
-                '\nInterest Rate: ' + data.interestRate + '%' +
-                '\nLoan Term: ' + data.loanTerm + ' months' +
-                '\nMonthly Interest Payment: ' + formatCurrency(data.loanAmount * data.monthlyInterestRate) +
-                '\n\nFor full detailed report, please see attached document.');
+            
+            const body = encodeURIComponent(
+                '═══════════════════════════════════════════════════════\n' +
+                'INVESTMENT ANALYSIS REPORT\n' +
+                '═══════════════════════════════════════════════════════\n\n' +
+                'Property: ' + (data.projectTitle || 'Investment Property') + '\n' +
+                'Generated: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + '\n\n' +
+                
+                '───────────────────────────────────────────────────────\n' +
+                'EXECUTIVE SUMMARY\n' +
+                '───────────────────────────────────────────────────────\n' +
+                'Purchase Price:           ' + formatCurrency(data.purchasePrice) + '\n' +
+                'Renovation Costs:         ' + formatCurrency(data.renovationCosts) + '\n' +
+                'After Repair Value (ARV): ' + formatCurrency(data.arv) + '\n' +
+                'Total Investment:         ' + formatCurrency(data.totalCosts + data.loanAmount) + '\n' +
+                'Net Profit:               ' + formatCurrency(data.netProfit) + '\n' +
+                'ROI:                      ' + data.roi.toFixed(2) + '%\n' +
+                'Annualized ROI:           ' + data.annualizedRoi.toFixed(2) + '%\n\n' +
+                
+                '───────────────────────────────────────────────────────\n' +
+                'FINANCING STRUCTURE\n' +
+                '───────────────────────────────────────────────────────\n' +
+                'Loan Amount:                ' + formatCurrency(data.loanAmount) + '\n' +
+                'Interest Rate:              ' + data.interestRate + '% annually\n' +
+                'Loan Term:                  ' + data.loanTerm + ' months\n' +
+                'Monthly Interest Payment:   ' + formatCurrency(monthlyInterestPayment) + '\n' +
+                'Total Interest Paid:        ' + formatCurrency(data.totalInterest) + '\n' +
+                'Out of Pocket Required:     ' + formatCurrency(data.outOfPocket) + '\n' +
+                'Loan-to-Value (ARV):        ' + data.maxLTV + '%\n\n' +
+                
+                '───────────────────────────────────────────────────────\n' +
+                'BUYING COSTS BREAKDOWN\n' +
+                '───────────────────────────────────────────────────────\n' +
+                'Title Company Fee:        ' + formatCurrency(data.titleCompany) + '\n' +
+                'Transfer Tax:             ' + formatCurrency(data.buyTransferTax) + '\n' +
+                'Lender Points (' + data.lenderPoints + '%):     ' + formatCurrency(data.pointsFee) + '\n' +
+                'Other Buying Costs:       ' + formatCurrency(data.otherBuying) + '\n' +
+                '                          ──────────────\n' +
+                'Total Buying Costs:       ' + formatCurrency(data.totalBuyingCosts) + '\n\n' +
+                
+                '───────────────────────────────────────────────────────\n' +
+                'CARRYING COSTS BREAKDOWN (' + data.loanTerm + ' months)\n' +
+                '───────────────────────────────────────────────────────\n' +
+                '                          Monthly         Total\n' +
+                'Interest Payments:        ' + formatCurrency(monthlyInterestPayment).padEnd(15) + ' ' + formatCurrency(data.totalInterest) + '\n' +
+                'Property Tax:             ' + formatCurrency(monthlyPropertyTax).padEnd(15) + ' ' + formatCurrency(totalPropertyTax) + '\n' +
+                'Insurance:                ' + formatCurrency(monthlyInsurance).padEnd(15) + ' ' + formatCurrency(totalInsurance) + '\n' +
+                'Utilities:                ' + formatCurrency(data.utilities).padEnd(15) + ' ' + formatCurrency(totalUtilities) + '\n' +
+                'Other Monthly Costs:      ' + formatCurrency(data.otherCarrying).padEnd(15) + ' ' + formatCurrency(totalOtherCarrying) + '\n' +
+                '                          ──────────────  ──────────────\n' +
+                'Total Carrying Costs:     ' + formatCurrency(data.monthlyCarrying).padEnd(15) + ' ' + formatCurrency(data.totalCarryingCosts) + '\n\n' +
+                
+                '───────────────────────────────────────────────────────\n' +
+                'SELLING COSTS BREAKDOWN\n' +
+                '───────────────────────────────────────────────────────\n' +
+                'Agent Commission (' + data.agentCommission + '%): ' + formatCurrency(data.commissionAmount) + '\n' +
+                'Transfer Tax:             ' + formatCurrency(data.sellTransferTax) + '\n' +
+                'Buyer Contributions:      ' + formatCurrency(data.buyerContributions) + '\n' +
+                'Other Selling Costs:      ' + formatCurrency(data.otherSelling) + '\n' +
+                '                          ──────────────\n' +
+                'Total Selling Costs:      ' + formatCurrency(data.totalSellingCosts) + '\n\n' +
+                
+                '───────────────────────────────────────────────────────\n' +
+                'INVESTMENT SUMMARY\n' +
+                '───────────────────────────────────────────────────────\n' +
+                'Purchase Price:           ' + formatCurrency(data.purchasePrice) + '\n' +
+                'Renovation Costs:         ' + formatCurrency(data.renovationCosts) + '\n' +
+                'Buying Costs:             ' + formatCurrency(data.totalBuyingCosts) + '\n' +
+                'Carrying Costs:           ' + formatCurrency(data.totalCarryingCosts) + '\n' +
+                'Selling Costs:            ' + formatCurrency(data.totalSellingCosts) + '\n' +
+                '                          ──────────────\n' +
+                'TOTAL PROJECT COST:       ' + formatCurrency(data.totalCosts) + '\n\n' +
+                'After Repair Value:       ' + formatCurrency(data.arv) + '\n' +
+                'Less: Loan Payoff:        -' + formatCurrency(data.loanAmount) + '\n' +
+                'Less: Total Costs:        -' + formatCurrency(data.totalCosts) + '\n' +
+                '                          ──────────────\n' +
+                'NET PROFIT:               ' + formatCurrency(data.netProfit) + '\n\n' +
+                
+                '═══════════════════════════════════════════════════════\n' +
+                'KEY METRICS\n' +
+                '═══════════════════════════════════════════════════════\n' +
+                'Return on Investment:     ' + data.roi.toFixed(2) + '%\n' +
+                'Annualized ROI:           ' + data.annualizedRoi.toFixed(2) + '%\n' +
+                'Cash Required:            ' + formatCurrency(data.outOfPocket) + '\n' +
+                'Total Profit:             ' + formatCurrency(data.netProfit) + '\n' +
+                'Project Duration:         ' + data.loanTerm + ' months\n\n' +
+                
+                '───────────────────────────────────────────────────────\n' +
+                'This detailed analysis was generated using the Hard Money\n' +
+                'Loan Calculator. All figures are estimates and should be\n' +
+                'verified with actual quotes and market data.\n' +
+                '───────────────────────────────────────────────────────'
+            );
 
             window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
         }
