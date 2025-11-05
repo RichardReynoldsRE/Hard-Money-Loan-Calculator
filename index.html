@@ -590,7 +590,7 @@
                     <label for="arv">After Repair Value (ARV)</label>
                     <div class="input-with-prefix">
                         <span class="input-prefix">$</span>
-                        <input type="number" id="arv" value="300000" min="0" step="1000">
+                        <input type="number" id="arv" value="350000" min="0" step="1000">
                     </div>
                 </div>
             </div>
@@ -718,7 +718,7 @@
                     <label for="sellTransferTax">Transfer Tax (Sell)</label>
                     <div class="input-with-prefix">
                         <span class="input-prefix">$</span>
-                        <input type="number" id="sellTransferTax" value="3000" min="0" step="100">
+                        <input type="number" id="sellTransferTax" value="3500" min="0" step="100">
                     </div>
                 </div>
                 <div class="input-group">
@@ -1115,7 +1115,7 @@
             // Final calculations
             const totalCosts = purchasePrice + renovationCosts + totalBuyingCosts + totalCarryingCosts + totalSellingCosts;
             const outOfPocket = neededAmount - loanAmount + totalBuyingCosts + (monthlyCarrying * loanTerm);
-            const netProfit = arv - totalCosts - loanAmount;
+            const netProfit = arv - totalCosts;  // Fixed: don't subtract loanAmount again
             const roi = outOfPocket > 0 ? (netProfit / outOfPocket) * 100 : 0;
             const annualizedRoi = loanTerm > 0 ? (roi / loanTerm) * 12 : 0;
 
